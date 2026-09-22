@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<base target="_top">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
+<title>Attendance Entry</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f6fb;
+  font-family: Arial, sans-serif;
+  color: #172033;
+}
+
+.app {
+  max-width: 900px;
+  margin: auto;
+  padding: 10px;
+}
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 18px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.header p {
+  margin: 5px 0 0;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.card {
+  background: white;
+  padding: 14px;
+  border-radius: 13px;
+  margin-bottom: 10px;
+}
+
+label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #475569;
+}
+
+#date {
+  display: block;
+  margin-top: 6px;
+  padding: 10px;
+  width: 100%;
+  max-width: 250px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stat {
+  background: white;
+  padding: 11px;
+  border-radius: 11px;
+}
+
+.stat small {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.stat strong {
+  display: block;
+  font-size: 21px;
+  margin-top: 3px;
+}
+
+#present {
+  color: #16a34a;
+}
+
+#absent {
+  color: #dc2626;
+}
+
+#percentage {
+  color: #7c3aed;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#search {
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 220px;
+  max-width: 100%;
+}
+
+.quick {
+  border: none;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.all-p {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.all-a {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f1f5f9;
+  padding: 10px;
+  text-align: left;
+  font-size: 11px;
+}
+
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 13px;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.status {
+  display: flex;
+  gap: 6px;
+}
+
+.status button {
+  width: 40px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.p {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.p.active {
+  background: #16a34a;
+  color: white;
+}
+
+.a {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.a.active {
+  background: #dc2626;
+  color: white;
+}
+
+.saving {
+  opacity: .5;
+}
+
+#loading {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+  color: #64748b;
+}
+
+#message {
+  display: none;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.success {
+  display: block !important;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.error {
+  display: block !important;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+@media(max-width:600px) {
+
+  .stats {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #search {
+    width: 100%;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">
+
+<h1>ATTENDANCE ENTRY</h1>
+
+<p>
+Select date and mark attendance
+</p>
+
+</div>
+
+
+<div class="card">
+
+<label>SELECT DATE</label>
+
+<input
+  type="date"
+  id="date"
+  onchange="loadAttendance()">
+
+
+<div style="margin-top:10px">
+
+<button
+  class="quick all-p"
+  onclick="markAll('P')">
+
+✓ Mark All Present
+
+</button>
+
+<button
+  class="quick all-a"
+  onclick="markAll('A')">
+
+✕ Mark All Absent
+
+</button>
+
+</div>
+
+</div>
+
+
+<div id="message"></div>
+
+
+<div id="loading">
+Loading students...
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+<small>TOTAL</small>
+<strong id="total">0</strong>
+</div>
+
+<div class="stat">
+<small>PRESENT</small>
+<strong id="present">0</strong>
+</div>
+
+<div class="stat">
+<small>ABSENT</small>
+<strong id="absent">0</strong>
+</div>
+
+<div class="stat">
+<small>ATTENDANCE</small>
+<strong id="percentage">0%</strong>
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="toolbar">
+
+<strong>
+STUDENTS
+</strong>
+
+<input
+  id="search"
+  placeholder="Search student..."
+  oninput="render()">
+
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>S.No.</th>
+
+<th>Registration No.</th>
+
+<th>Student Name</th>
+
+<th>Attendance</th>
+
+</tr>
+
+</thead>
+
+<tbody id="students"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+let data = [];
+let saveQueue = Promise.resolve();
+
+const API = "/api/attendance";
+
+window.onload = function() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+
+  document.getElementById("date").value =
+    yyyy + "-" + mm + "-" + dd;
+
+  loadAttendance();
+};
+
+async function loadAttendance() {
+  const date = document.getElementById("date").value;
+  if (!date) return;
+
+  loading(true);
+  clearMessage();
+
+  try {
+    const response = await fetch(
+      API + "?date=" + encodeURIComponent(date),
+      { cache: "no-store" }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || result.success === false) {
+      throw new Error(result.error || "Unable to load attendance.");
+    }
+
+    data = result.students || [];
+    render();
+    stats();
+
+  } catch (error) {
+    errorMessage(error.message || "Unable to load attendance.");
+  } finally {
+    loading(false);
+  }
+}
+
+function render() {
+  const tbody = document.getElementById("students");
+  tbody.innerHTML = "";
+
+  const search =
+    document.getElementById("search").value.toLowerCase().trim();
+
+  data
+    .filter(function(s) {
+      return (
+        String(s.sno).toLowerCase().includes(search) ||
+        String(s.registration).toLowerCase().includes(search) ||
+        String(s.name).toLowerCase().includes(search)
+      );
+    })
+    .forEach(function(s) {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${safe(s.sno)}</td>
+        <td>${safe(s.registration)}</td>
+        <td class="name">${safe(s.name)}</td>
+        <td>
+          <div class="status">
+            <button
+              class="p ${s.status === "P" ? "active" : ""}"
+              onclick="setStatus(${s.row},'P')">P</button>
+            <button
+              class="a ${s.status === "A" ? "active" : ""}"
+              onclick="setStatus(${s.row},'A')">A</button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+}
+
+function setStatus(row, status) {
+  const student = data.find(function(s) {
+    return s.row === row;
+  });
+
+  if (!student) return;
+
+  const oldStatus = student.status;
+  student.status = status;
+
+  render();
+  stats();
+
+  const date = document.getElementById("date").value;
+
+  saveQueue = saveQueue.then(async function() {
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "saveOne",
+          date: date,
+          row: row,
+          status: status
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.error || "Attendance save failed.");
+      }
+
+      showSuccess(student.name + " marked " + status);
+
+    } catch (error) {
+      student.status = oldStatus;
+      render();
+      stats();
+      errorMessage(error.message || "Attendance save failed.");
+    }
+  });
+}
+
+function markAll(status) {
+  const date = document.getElementById("date").value;
+  if (!date || !data.length) return;
+
+  data.forEach(function(student) {
+    student.status = status;
+  });
+
+  render();
+  stats();
+
+  saveQueue = saveQueue.then(async function() {
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "saveAll",
+          date: date,
+          attendanceData: data.map(function(student) {
+            return {
+              row: student.row,
+              name: student.name,
+              status: student.status
+            };
+          })
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.error || "Attendance save failed.");
+      }
+
+      showSuccess(
+        result.message +
+        " | Present: " + result.present +
+        " | Absent: " + result.absent
+      );
+
+      await loadAttendance();
+
+    } catch (error) {
+      errorMessage(error.message || "Attendance save failed.");
+      await loadAttendance();
+    }
+  });
+}
+
+function stats() {
+  let p = 0;
+  let a = 0;
+
+  data.forEach(function(s) {
+    if (s.status === "P") p++;
+    if (s.status === "A") a++;
+  });
+
+  const marked = p + a;
+  const percentage =
+    marked ? (p / marked * 100).toFixed(1) : "0.0";
+
+  document.getElementById("total").textContent = data.length;
+  document.getElementById("present").textContent = p;
+  document.getElementById("absent").textContent = a;
+  document.getElementById("percentage").textContent =
+    percentage + "%";
+}
+
+function loading(show) {
+  document.getElementById("loading").style.display =
+    show ? "block" : "none";
+}
+
+function showSuccess(message) {
+  const box = document.getElementById("message");
+  box.className = "success";
+  box.textContent = message;
+  box.style.display = "block";
+
+  setTimeout(function() {
+    box.style.display = "none";
+  }, 2500);
+}
+
+function errorMessage(message) {
+  const box = document.getElementById("message");
+  box.className = "error";
+  box.textContent = message;
+  box.style.display = "block";
+}
+
+function clearMessage() {
+  const box = document.getElementById("message");
+  box.style.display = "none";
+  box.textContent = "";
+}
+
+function safe(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+</script>
+
+</body>
+
+</html>
